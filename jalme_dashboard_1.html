@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>잘빠진메밀 | 3월 마케팅 결산</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Noto+Serif+KR:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#1a1a1a;--gold:#FFD700;--gold2:#cc8800;
+  --red:#E24B4A;--blue:#378ADD;--green:#00a040;
+  --bg:#fafaf8;--card:#ffffff;--border:#e8e8e8;
+  --muted:#888;--light:#f4f4f0;
+}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+
+/* HEADER */
+.site-header{background:var(--ink);color:#fff;padding:20px 24px;position:sticky;top:0;z-index:100;border-bottom:3px solid var(--gold)}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.logo{font-family:'Noto Serif KR',serif;font-size:18px;font-weight:700;color:var(--gold);letter-spacing:.05em}
+.logo span{color:#fff;font-size:12px;font-weight:400;display:block;margin-top:2px;letter-spacing:.1em}
+.header-meta{font-size:11px;color:rgba(255,255,255,.5);text-align:right}
+.header-meta strong{color:var(--gold);display:block;font-size:14px}
+
+/* TAB NAV */
+.tab-nav{background:#fff;border-bottom:1px solid var(--border);position:sticky;top:69px;z-index:90;overflow-x:auto}
+.tab-nav-inner{max-width:1100px;margin:0 auto;display:flex;gap:0}
+.tab-btn{padding:14px 20px;border:none;background:none;font-family:'Noto Sans KR',sans-serif;font-size:12px;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all .2s;flex-shrink:0}
+.tab-btn:hover{color:var(--ink)}
+.tab-btn.active{color:var(--ink);border-bottom-color:var(--gold)}
+.tab-btn .rate{font-size:10px;margin-left:4px;padding:1px 5px;border-radius:10px;font-weight:700}
+.rate-ok{background:#e8f8ee;color:var(--green)}
+.rate-warn{background:#fffbe6;color:var(--gold2)}
+.rate-bad{background:#fff0f0;color:var(--red)}
+
+/* MAIN */
+.main{max-width:1100px;margin:0 auto;padding:20px 16px 60px}
+
+/* KPI ROW */
+.kpi-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.kpi-label{font-size:10px;color:var(--muted);margin-bottom:6px;letter-spacing:.04em}
+.kpi-val{font-size:22px;font-weight:900;line-height:1;color:var(--ink)}
+.kpi-val span{font-size:13px;font-weight:400;color:var(--muted);margin-left:2px}
+.kpi-sub{font-size:10px;color:#bbb;margin-top:4px}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.card-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.badge-dark{background:var(--ink);color:var(--gold)}
+.badge-green{background:#e8f8ee;color:var(--green)}
+.badge-gray{background:#eee;color:#888}
+.legend{display:flex;gap:14px;margin-bottom:10px;font-size:11px;color:var(--muted);flex-wrap:wrap}
+.ld{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:4px;vertical-align:middle}
+
+/* CHART WRAP */
+.chart-wrap{position:relative;width:100%;height:300px}
+
+/* TIER BARS */
+.tier-item{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.tier-label{font-size:11px;color:#555;width:80px;flex-shrink:0;line-height:1.4}
+.tier-bar-bg{flex:1;background:#f0f0f0;border-radius:4px;height:24px}
+.tier-bar-fill{height:24px;border-radius:4px;display:flex;align-items:center;padding-left:10px;min-width:60px;transition:width .6s ease}
+.tier-bar-fill span{font-size:12px;font-weight:800;color:#fff;white-space:nowrap}
+
+/* INSIGHT */
+.insight{border-radius:10px;padding:14px 16px;font-size:12px;line-height:1.9;margin-bottom:14px}
+.insight.yellow{background:#fffbe6;border-left:4px solid var(--gold)}
+.insight.red{background:#fff5f5;border-left:4px solid var(--red)}
+.insight.green{background:#f0fff6;border-left:4px solid var(--green)}
+.insight.blue{background:#f0f7ff;border-left:4px solid var(--blue)}
+
+/* TABLE */
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl{width:100%;border-collapse:collapse;font-size:11px;min-width:520px}
+.tbl thead tr{background:var(--ink);color:var(--gold)}
+.tbl th{padding:8px 10px;font-weight:700;text-align:center;white-space:nowrap}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:6px 10px;border-bottom:.5px solid #f2f2f2;text-align:center;vertical-align:middle}
+.tbl td:first-child{text-align:left;font-weight:600;color:#444}
+.tbl tr.we{background:#fffde8}
+.tbl tr.hol td{color:#ccc}
+.tbl tr:hover{background:#f9f9f6}
+.bar-cell{display:flex;align-items:center;gap:6px}
+.bar-bg{flex:1;background:#efefef;border-radius:3px;height:7px;min-width:40px;max-width:100px}
+.bar-fill{height:7px;border-radius:3px}
+.sal-val{font-size:11px;font-weight:800;min-width:40px;text-align:right;white-space:nowrap}
+.rb{display:inline-block;padding:1px 8px;border-radius:10px;font-size:11px;font-weight:700}
+
+/* GRID 2COL */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+
+/* SUMMARY TABLE */
+.sum-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.sum-tbl th{background:#f4f4f0;padding:8px 12px;text-align:left;font-weight:700;font-size:11px;color:var(--muted);border-bottom:1px solid var(--border)}
+.sum-tbl td{padding:10px 12px;border-bottom:.5px solid #f0f0f0;vertical-align:middle}
+.sum-tbl tr:last-child td{border-bottom:none;font-weight:700;background:#fffbe6}
+
+@media(max-width:640px){
+  .kpi-row{grid-template-columns:repeat(2,1fr)}
+  .grid2{grid-template-columns:1fr}
+  .kpi-val{font-size:18px}
+  .tab-btn{padding:12px 14px;font-size:11px}
+  .chart-wrap{height:240px}
+  .main{padding:14px 12px 60px}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo">잘빠진 메밀<span>JALME GROUP · 6개 매장</span></div>
+    <div class="header-meta"><strong>3월 마케팅 결산</strong>2026.03.01 — 03.31 · 플레이스 순위 × 매출 분석</div>
+  </div>
+</header>
+
+<nav class="tab-nav">
+  <div class="tab-nav-inner">
+    <button class="tab-btn active" data-key="summary">📋 종합요약</button>
+    <button class="tab-btn" data-key="seochon">🏠 서촌<span class="rate rate-warn">79%</span></button>
+    <button class="tab-btn" data-key="seosunra">🛤️ 서순라<span class="rate rate-ok">91%</span></button>
+    <button class="tab-btn" data-key="euljiro">🏙️ 을지로<span class="rate rate-ok">98%</span></button>
+    <button class="tab-btn" data-key="sinyong">🏔️ 신용산<span class="rate rate-ok">112%</span></button>
+    <button class="tab-btn" data-key="sungshin">🎓 성신여대<span class="rate rate-bad">67%</span></button>
+    <button class="tab-btn" data-key="olympic">🏟️ 올림픽<span class="rate rate-bad">52%</span></button>
+  </div>
+</nav>
+
+<main class="main" id="main"></main>
+
+<script>
+const DOW=['일','월','화','수','목','금','토','일','월','화','수','목','금','토','일','월','화','수','목','금','토','일','월','화','수','목','금','토','일','월','화'];
+const WE=[0,6,7,13,14,20,21,27,28];
+const S={
+  seochon:{name:'서촌본점',kw:'서촌맛집',target:10196,rate:79,total:8086,inflow:67375,
+    sales:[4313600,2444500,1688900,1774000,1974900,2120400,3920400,3426000,1795000,2060000,2261500,1868500,3254000,3970900,2777000,2542500,2895500,1373400,2342000,1944500,1201500,3755900,2627000,2266500,2566000,2634500,2849500,4161500,3568800,2079000,2399000],
+    orders:[99,66,44,46,53,56,83,86,46,56,55,48,80,90,66,60,67,36,64,55,36,92,66,57,64,68,70,94,92,56,68],
+    ranks:[2,2,2,2,2,2,2,2,2,3,4,5,7,10,11,11,14,17,23,27,29,28,23,24,25,25,24,24,31,54,32],
+    corr:true,ic:'yellow',
+    insight:'<strong>순위 2~3위(3/1~10)</strong> 구간 평일 일매출 평균 270만원 이상. 3/11 이후 순위 하락과 함께 평일 180~230만원대로 감소. 주말은 순위 무관하게 350~420만원 안정적. <strong>순위 상위일수록 평일 매출이 명확히 높아지는 구조.</strong>'},
+  seosunra:{name:'서순라길',kw:'종로맛집',target:9716,rate:91,total:8806,inflow:52323,
+    sales:[4394500,2767500,1536000,2228500,2537000,2604500,3776500,3907000,1432000,1631000,2273500,2806000,2523000,5029500,3977000,1739000,2122000,2199000,2085500,2775000,2322000,4124500,2233500,2316500,3036500,2540500,3093000,4920000,4747500,2507000,1870000],
+    orders:[102,58,33,52,57,53,87,91,39,40,48,66,60,115,88,42,49,47,51,54,55,102,50,64,71,61,78,108,114,66,44],
+    ranks:[3,3,4,4,3,3,3,2,2,2,2,3,4,4,13,12,12,17,21,24,41,66,112,102,103,110,118,107,70,92,64],
+    corr:true,ic:'yellow',
+    insight:'<strong>3/1~14 평균순위 3위</strong> → 평일 200~280만원·주말 390~503만원. <strong>3/15 순위 13위로 급락</strong>, 3/27 최저 118위까지 하락하며 평일 170~210만원대로 감소. 3/29 순위 회복과 함께 474만원 반등. 경쟁업체 12,922개 — <strong>순위 방어가 매출 안정의 핵심.</strong>'},
+  euljiro:{name:'을지로',kw:'을지로맛집',target:5096,rate:98,total:5003,inflow:25056,
+    sales:[1417000,1255000,1420000,1194000,1184000,1666000,1609000,1074000,1923000,1629000,1332000,1902000,2359000,1856000,723000,1187000,2741800,1370000,1925900,1852000,1244000,1229000,1811000,1591000,1952900,2036000,2763000,1563000,856000,939000,2429000],
+    orders:[37,34,35,30,29,42,42,28,27,32,30,38,47,40,25,29,58,34,40,51,31,29,41,43,54,58,64,37,30,35,55],
+    ranks:[null,null,8,11,9,11,15,18,21,20,30,28,31,37,39,39,40,57,65,62,55,38,36,26,26,31,34,63,34,47,34],
+    corr:false,ic:'green',
+    insight:'<strong>검색 유입 44.6%</strong>로 타지점 대비 높아 순위 등락에도 매출이 안정적. 단골·직장인 재방문 수요가 매출 기저를 받쳐주는 구조. 달성률 98%로 전 매장 중 <strong>목표 대비 가장 효율적.</strong>'},
+  sinyong:{name:'신용산',kw:'용산역맛집',target:4520,rate:112,total:5069,inflow:32265,
+    sales:[2579600,1781900,1404900,1025000,1495800,1243000,2247000,1405000,1047900,1604700,1015900,1528800,1602900,2521700,1703800,1243500,1782900,1390900,1629000,1704900,2450300,1664000,1322900,1478000,1331900,1385800,1640900,2899800,2101700,969800,1483000],
+    orders:[63,43,24,21,35,32,58,37,25,32,27,34,39,56,44,29,39,27,36,45,61,49,29,36,35,31,42,74,55,19,32],
+    ranks:[59,71,97,134,78,54,54,49,49,52,69,68,76,81,67,66,66,93,100,86,87,77,83,72,61,72,63,76,75,72,60],
+    corr:false,ic:'blue',
+    insight:'<strong>평균순위 76위</strong>에도 달성률 112% 전 매장 1위. 네이버지도 유입 81.2%로 광고+용산 자체 트래픽이 순위를 대체. <strong>광고 유지 + 키워드 작업 병행 시 추가 성장 여력 큼.</strong>'},
+  sungshin:{name:'성신여대',kw:'성신여대맛집',target:3442,rate:67,total:2292,inflow:21078,
+    sales:[927500,848000,209000,459000,596000,518000,1140000,825500,633800,543000,872000,902000,551500,1030000,1123000,492000,840000,427000,1539000,333000,935000,1341500,537000,785000,599000,427000,545000,887000,905500,704000,448000],
+    orders:[28,31,8,15,18,17,28,31,21,15,22,23,14,34,39,19,25,16,26,12,34,45,18,25,18,15,22,31,36,22,18],
+    ranks:[27,31,11,17,23,12,14,11,13,18,18,25,24,49,38,38,39,48,60,62,66,62,57,66,69,70,74,140,138,161,140],
+    corr:true,ic:'red',
+    insight:'<strong>3/1~13 순위 11~27위</strong> → 평일 50~90만원 유지. <strong>3/14(49위) 이후 급락</strong>해 3/28~30 140~161위 → 매출도 33~70만원대로 동반 하락. 저장수 44,000(전 매장 1위)인데 실방문 전환율이 낮은 구조. <strong>4월 개강 이벤트·봄 신메뉴로 저장 고객 전환 집중 필요.</strong>'},
+  olympic:{name:'올림픽공원',kw:'올림픽공원맛집',target:3332,rate:52,total:1724,inflow:15126,
+    sales:[1278000,0,599000,447000,571000,272000,691000,559000,0,0,476500,434000,293000,863000,842000,0,439000,241000,289000,555000,927000,1696000,0,867000,577000,0,1017000,944000,1771000,0,591000],
+    orders:[30,0,15,11,16,6,14,15,0,0,11,8,8,21,19,0,12,7,9,17,27,44,0,26,19,0,27,25,42,0,18],
+    ranks:[55,65,60,66,103,107,125,135,141,143,142,150,158,160,163,214,173,174,173,175,163,152,152,52,48,45,40,40,39,38,61],
+    corr:true,ic:'yellow',
+    insight:'<strong>3/1~23 평균순위 135위</strong> → 일매출 24~97만원. <strong>3/24 순위 52위로 급반등</strong> → 이후 38~52위 유지되며 일매출 57~177만원으로 즉각 상승. 순위↔매출 상관관계 전 매장 중 가장 명확. <strong>4월 봄 시즌 야외 트래픽 수혜 — 주말 운영 유지 필수.</strong>'}
+};
+
+function rs(r){
+  if(!r)return{bg:'#f0f0f0',fc:'#ccc'};
+  if(r<=5)return{bg:'#e8f8ee',fc:'#00a040'};
+  if(r<=15)return{bg:'#ddeeff',fc:'#1a5fcc'};
+  if(r<=40)return{bg:'#fffbe6',fc:'#cc8800'};
+  if(r<=80)return{bg:'#fff0e0',fc:'#cc5500'};
+  return{bg:'#fff0f0',fc:'#cc2222'};
+}
+
+let charts={};
+function killCharts(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
+
+// 주말 배경 플러그인
+const weBgPlugin={
+  id:'weBg',
+  beforeDraw(chart){
+    const{ctx,chartArea,scales}=chart;
+    if(!chartArea||!scales.x)return;
+    ctx.save();
+    WE.forEach(idx=>{
+      const x0=scales.x.getPixelForValue(idx);
+      const x1=scales.x.getPixelForValue(idx+1);
+      const bw=Math.abs(x1-x0);
+      ctx.fillStyle='rgba(255,215,0,0.13)';
+      ctx.fillRect(x0-bw/2,chartArea.top,bw,chartArea.bottom-chartArea.top);
+    });
+    ctx.restore();
+  }
+};
+
+function renderSummary(){
+  killCharts();
+  const keys=['seochon','seosunra','euljiro','sinyong','sungshin','olympic'];
+  const names=['서촌본점','서순라길','을지로','신용산','성신여대','올림픽공원'];
+  const rates=[79,91,98,112,67,52];
+  const totals=[8086,8806,5003,5069,2292,1724];
+  const targets=[10196,9716,5096,4520,3442,3332];
+  const avgRanks=[15,32,35,76,55,113];
+
+  const rateColor=r=>r>=100?'#00a040':r>=85?'#378ADD':r>=70?'#cc8800':'#cc2222';
+  const totalAll=totals.reduce((a,b)=>a+b,0);
+  const targetAll=targets.reduce((a,b)=>a+b,0);
+  const avgRate=Math.round(totalAll/targetAll*100);
+
+  document.getElementById('main').innerHTML=`
+    <div class="kpi-row" style="grid-template-columns:repeat(4,minmax(0,1fr))">
+      <div class="kpi"><div class="kpi-label">6개 매장 합산 매출</div><div class="kpi-val" style="color:#cc8800">${totalAll.toLocaleString()}<span>만원</span></div><div class="kpi-sub">목표 ${targetAll.toLocaleString()}만원</div></div>
+      <div class="kpi"><div class="kpi-label">평균 달성률</div><div class="kpi-val" style="color:#cc8800">${avgRate}<span>%</span></div><div class="kpi-sub">신용산 112% 최고</div></div>
+      <div class="kpi"><div class="kpi-label">합산 결제건수</div><div class="kpi-val">7,651<span>건</span></div><div class="kpi-sub">건당 평균 40,491원</div></div>
+      <div class="kpi"><div class="kpi-label">홀 매출 비중</div><div class="kpi-val">95<span>%</span></div><div class="kpi-sub">배달 5% (1,435만원)</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">지점별 목표 달성률 & 3월 매출 비교</div>
+      <div class="chart-wrap"><canvas id="c-sum"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">6개 지점 종합 현황</div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr>
+          <th style="text-align:left">지점</th><th>3월 매출</th><th>목표</th><th>달성률</th><th>평균순위</th><th>순위↔매출</th><th>4월 봄수혜</th>
+        </tr></thead>
+        <tbody>
+          <tr><td>🏠 서촌본점</td><td>8,086만</td><td>10,196만</td><td><span class="rb" style="background:#fffbe6;color:#cc8800">79%</span></td><td>15위</td><td>✅ 연동</td><td>🌸 높음</td></tr>
+          <tr><td>🛤️ 서순라길</td><td>8,806만</td><td>9,716만</td><td><span class="rb" style="background:#e8f8ee;color:#00a040">91%</span></td><td>32위</td><td>✅ 연동</td><td>🌸 높음</td></tr>
+          <tr><td>🏙️ 을지로</td><td>5,003만</td><td>5,096만</td><td><span class="rb" style="background:#e8f8ee;color:#00a040">98%</span></td><td>35위</td><td>➖ 독립</td><td>🌤 중간</td></tr>
+          <tr><td>🏔️ 신용산</td><td>5,069만</td><td>4,520만</td><td><span class="rb" style="background:#e8f8ee;color:#00a040">112%</span></td><td>76위</td><td>➖ 독립</td><td>🌸 높음</td></tr>
+          <tr><td>🎓 성신여대</td><td>2,292만</td><td>3,442만</td><td><span class="rb" style="background:#fff0f0;color:#cc2222">67%</span></td><td>55위</td><td>✅ 연동</td><td>🌤 중간</td></tr>
+          <tr><td>🏟️ 올림픽공원</td><td>1,724만</td><td>3,332만</td><td><span class="rb" style="background:#fff0f0;color:#cc2222">52%</span></td><td>113위</td><td>✅ 연동</td><td>🌸 최고</td></tr>
+          <tr style="background:#fffbe6;font-weight:700"><td>합계</td><td>30,980만</td><td>36,302만</td><td><span class="rb" style="background:#fffbe6;color:#cc8800">85%</span></td><td>—</td><td>—</td><td>—</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="insight yellow">
+      <strong>💡 전체 인사이트 —</strong> 순위↔매출 연동이 명확한 지점(서촌·서순라·성신여대·올림픽)은 플레이스 작업이 직접 매출로 이어지는 구조. 을지로·신용산은 재방문 수요·광고가 순위를 대체하므로 별도 전략 필요. 4월은 봄 시즌 자연 유입 기대되나, 경쟁 매장도 동반 수혜를 받으므로 <strong>순위 관리를 병행해야 점유율을 지킬 수 있음.</strong>
+    </div>
+  `;
+
+  charts.sum=new Chart(document.getElementById('c-sum'),{
+    data:{
+      labels:names,
+      datasets:[
+        {type:'bar',label:'3월 매출(만원)',data:totals,backgroundColor:rates.map(r=>r>=100?'rgba(0,160,64,.7)':r>=85?'rgba(55,138,221,.7)':r>=70?'rgba(204,136,0,.7)':'rgba(204,34,34,.7)'),yAxisID:'y',order:2},
+        {type:'line',label:'달성률(%)',data:rates,borderColor:'#FFD700',backgroundColor:'rgba(255,215,0,.1)',pointBackgroundColor:rates.map(r=>r>=100?'#00a040':r>=85?'#378ADD':r>=70?'#cc8800':'#cc2222'),pointRadius:6,borderWidth:2.5,yAxisID:'y2',order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}},tooltip:{mode:'index',intersect:false}},
+      scales:{
+        y:{position:'left',ticks:{callback:v=>v+'만',font:{size:10}},grid:{color:'rgba(0,0,0,.04)'},title:{display:true,text:'매출(만원)',font:{size:10}}},
+        y2:{position:'right',min:0,max:130,ticks:{callback:v=>v+'%',font:{size:10}},grid:{display:false},title:{display:true,text:'달성률(%)',font:{size:10}}}
+      }
+    }
+  });
+}
+
+function renderStore(key){
+  killCharts();
+  const s=S[key];
+  const maxS=Math.max(...s.sales);
+  const validS=s.sales.filter(v=>v>0);
+  const avgS=Math.round(validS.reduce((a,b)=>a+b,0)/validS.length);
+  const totalO=s.orders.reduce((a,b)=>a+b,0);
+  const vR=s.ranks.filter(r=>r);
+  const avgR=vR.length?Math.round(vR.reduce((a,b)=>a+b,0)/vR.length):0;
+  const rc=s.rate>=100?'#00a040':s.rate>=85?'#378ADD':s.rate>=70?'#cc8800':'#cc2222';
+
+  let tierHTML='';
+  if(s.corr){
+    const T=[[],[],[],[]];
+    s.ranks.forEach((r,i)=>{if(!r||s.sales[i]===0)return;const v=s.sales[i]/10000;if(r<=5)T[0].push(v);else if(r<=15)T[1].push(v);else if(r<=40)T[2].push(v);else T[3].push(v);});
+    const avg=a=>a.length?Math.round(a.reduce((x,y)=>x+y,0)/a.length):0;
+    const ta=T.map(avg);const mx=Math.max(...ta.filter(Boolean))||1;
+    const lb=['TOP 1~5위','6~15위','16~40위','41위 이하'];
+    const bg=['#00a040','#378ADD','#cc8800','#cc2222'];
+    tierHTML=`<div class="card"><div class="card-title"><span class="badge badge-dark">순위↔매출 상관관계</span> 순위 구간별 일평균 매출</div>
+      ${lb.map((l,i)=>T[i].length?`<div class="tier-item">
+        <div class="tier-label">${l}<br><span style="color:#bbb;font-size:10px">${T[i].length}일</span></div>
+        <div class="tier-bar-bg"><div class="tier-bar-fill" style="width:${Math.round(ta[i]/mx*100)}%;background:${bg[i]}"><span>${ta[i]}만원</span></div></div>
+      </div>`:'').join('')}
+    </div>`;
+  }
+
+  document.getElementById('main').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-size:20px;font-weight:900;color:var(--ink)">${s.name} <span style="background:var(--gold);padding:1px 8px;border-radius:3px;font-size:12px;font-weight:700;color:var(--ink);margin-left:4px">3월 마케팅 보고서</span></div>
+        <div style="font-size:11px;color:#aaa;margin-top:4px">${s.kw} · 월유입 ${s.inflow.toLocaleString()}건</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:34px;font-weight:900;color:${rc};line-height:1">${s.rate}%</div>
+        <div style="font-size:10px;color:#aaa">목표 달성률</div>
+        <div style="font-size:10px;color:#888">${(s.total*10000).toLocaleString()}원 / ${(s.target*10000).toLocaleString()}원</div>
+      </div>
+    </div>
+
+    <div class="kpi-row">
+      <div class="kpi"><div class="kpi-label">3월 총매출</div><div class="kpi-val" style="color:${rc}">${s.total.toLocaleString()}<span>만</span></div><div class="kpi-sub">목표 ${s.target.toLocaleString()}만원</div></div>
+      <div class="kpi"><div class="kpi-label">일평균 매출</div><div class="kpi-val">${Math.round(avgS/10000)}<span>만</span></div><div class="kpi-sub">최고 ${Math.round(maxS/10000)}만 (${s.sales.indexOf(maxS)+1}일)</div></div>
+      <div class="kpi"><div class="kpi-label">총 결제건수</div><div class="kpi-val">${totalO.toLocaleString()}<span>건</span></div><div class="kpi-sub">일평균 ${Math.round(totalO/31)}건</div></div>
+      <div class="kpi"><div class="kpi-label">평균 플레이스 순위</div><div class="kpi-val" style="color:${avgR<=15?'#00a040':avgR<=40?'#cc8800':'#cc2222'}">${avgR}<span>위</span></div><div class="kpi-sub">${s.kw}</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        3월 일별 총매출 &amp; 플레이스 순위
+        <span class="badge badge-dark">${s.kw}</span>
+        ${s.corr?'<span class="badge badge-green">순위↔매출 연동</span>':'<span class="badge badge-gray">순위 독립구조</span>'}
+      </div>
+      <div class="legend">
+        <span><span class="ld" style="background:#E24B4A"></span>총매출 (좌측·만원)</span>
+        <span><span class="ld" style="background:#378ADD;border-radius:50%"></span>플레이스 순위 (우측·낮을수록 상위)</span>
+        <span><span class="ld" style="background:rgba(255,215,0,0.4);border:1px solid #e0c800"></span>주말</span>
+      </div>
+      <div class="chart-wrap"><canvas id="c-main"></canvas></div>
+    </div>
+
+    ${tierHTML}
+    <div class="insight ${s.ic}">${s.insight}</div>
+
+    <div class="card">
+      <div class="card-title">3월 일별 통합 현황</div>
+      <div class="tbl-wrap"><table class="tbl">
+        <thead><tr>
+          <th style="text-align:left">날짜</th>
+          <th style="width:40%">총매출</th>
+          <th>결제건</th>
+          <th>플레이스 순위</th>
+          <th>순위변동</th>
+          <th>매출변동</th>
+        </tr></thead>
+        <tbody id="tb"></tbody>
+      </table></div>
+    </div>
+  `;
+
+  // 메인 차트
+  const salData=s.sales.map(v=>v>0?Math.round(v/10000*10)/10:null);
+  const labels=Array.from({length:31},(_,i)=>`${i+1}(${DOW[i]})`);
+  charts.main=new Chart(document.getElementById('c-main'),{
+    plugins:[weBgPlugin],
+    data:{labels,datasets:[
+      {type:'line',label:'총매출(만원)',data:salData,borderColor:'#E24B4A',backgroundColor:'rgba(226,75,74,0.08)',borderWidth:2.5,
+       pointBackgroundColor:salData.map((v,i)=>v===null?'transparent':WE.includes(i)?'#ff6b35':'#E24B4A'),
+       pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:salData.map(v=>v===null?0:4),
+       tension:.35,yAxisID:'yL',spanGaps:false,fill:true,order:1},
+      {type:'line',label:'플레이스 순위',data:s.ranks.map(r=>r||null),borderColor:'#378ADD',backgroundColor:'transparent',
+       borderWidth:2,pointBackgroundColor:s.ranks.map(r=>r?rs(r).fc:'transparent'),
+       pointBorderColor:'#fff',pointBorderWidth:1.5,pointRadius:s.ranks.map(r=>r?4:0),
+       tension:.3,yAxisID:'yR',spanGaps:true,fill:false,order:0}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(20,20,20,0.85)',padding:10,
+        callbacks:{title:i=>`3월 ${i[0].label}`,label:ctx=>{
+          if(ctx.dataset.label==='총매출(만원)'){const v=ctx.parsed.y;return v!=null?` 매출: ${v.toFixed(1)}만원`:' 매출: -';}
+          return ctx.parsed.y!=null?` 순위: ${ctx.parsed.y}위`:' 순위: -';
+        }}}},
+      scales:{
+        yL:{position:'left',beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},
+            ticks:{callback:v=>v+'만',font:{size:10},color:'#cc3333'},
+            title:{display:true,text:'← 매출(만원)',color:'#cc3333',font:{size:10,weight:'bold'}}},
+        yR:{position:'right',reverse:true,beginAtZero:false,min:0,grid:{display:false},
+            ticks:{callback:v=>v+'위',font:{size:10},color:'#2266cc'},
+            title:{display:true,text:'순위(↑상위) →',color:'#2266cc',font:{size:10,weight:'bold'}}},
+        x:{ticks:{font:{size:9},maxRotation:45,color:'#888'},grid:{display:false}}
+      }
+    }
+  });
+
+  // 테이블
+  const tb=document.getElementById('tb');
+  s.sales.forEach((sal,i)=>{
+    const d=i+1;const isWE=WE.includes(i);const isHol=sal===0;
+    const r=s.ranks[i];const rSt=rs(r);
+    const prevR=i>0?s.ranks[i-1]:null;
+    const rChg=(r&&prevR)?(prevR-r):null;
+    const prevSal=i>0?s.sales[i-1]:null;
+    const sChg=(prevSal!=null&&prevSal>0&&sal>0)?Math.round((sal-prevSal)/10000*10)/10:null;
+    const pct=maxS>0?Math.round(sal/maxS*100):0;
+    const bColor=sal>=3000000?'#00a040':sal>=1500000?'#378ADD':'#FFD700';
+    const salM=(Math.round(sal/10000*10)/10).toFixed(1);
+    const salColor=sal>=3000000?'#00a040':sal>=2000000?'#1a1a1a':sal>=1000000?'#cc8800':'#cc5500';
+    tb.innerHTML+=`<tr class="${isHol?'hol':isWE?'we':''}">
+      <td style="white-space:nowrap">${d}일 <span style="color:#bbb;font-size:10px">${DOW[i]}${isWE?' ★':''}</span></td>
+      <td>${isHol?'<span style="color:#ddd">휴무</span>':`<div class="bar-cell">
+        <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${bColor}"></div></div>
+        <span class="sal-val" style="color:${salColor}">${salM}만</span>
+      </div>`}</td>
+      <td style="color:#777">${isHol?'-':s.orders[i]+'건'}</td>
+      <td>${r?`<span class="rb" style="background:${rSt.bg};color:${rSt.fc}">${r}위</span>`:'<span style="color:#ddd">-</span>'}</td>
+      <td style="font-size:10px;white-space:nowrap">${rChg!=null?`<span style="color:${rChg>0?'#00a040':rChg<0?'#cc2222':'#aaa'}">${rChg>0?'▲'+rChg:rChg<0?'▼'+Math.abs(rChg):'―'}</span>`:'<span style="color:#ddd">-</span>'}</td>
+      <td style="font-size:10px;white-space:nowrap">${sChg!=null?`<span style="color:${sChg>0?'#00a040':'#cc2222'}">${sChg>0?'+':''}${sChg.toFixed(1)}만</span>`:'<span style="color:#ddd">-</span>'}</td>
+    </tr>`;
+  });
+}
+
+document.querySelectorAll('.tab-btn').forEach(t=>{
+  t.addEventListener('click',function(){
+    document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));
+    this.classList.add('active');
+    const key=this.dataset.key;
+    if(key==='summary') renderSummary();
+    else renderStore(key);
+  });
+});
+renderSummary();
+</script>
+</body>
+</html>
